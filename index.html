@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Privacy Scout</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <header class="bg-teal-600 text-white p-4">
+        <h1 class="text-2xl font-bold">App Privacy Scout</h1>
+        <p class="text-sm">Check apps for privacy risks before you use them</p>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-4">
+        <section id="home" class="mb-8">
+            <h2 class="text-xl font-semibold mb-2">Stay Safe with Apps</h2>
+            <p class="text-gray-700">
+                Drag and drop an app’s privacy policy file or paste its URL to check for risky permissions and data practices. Get clear advice to protect your privacy.
+            </p>
+            <div class="mt-4 p-6 border-2 border-dashed border-gray-400 rounded bg-white text-center">
+                <input type="file" id="fileInput" class="hidden" accept=".txt,.pdf" onchange="scanPolicy()">
+                <label for="fileInput" class="cursor-pointer text-teal-600 hover:underline">
+                    Click to upload or drag policy file here
+                </label>
+                <p class="text-sm text-gray-600 mt-2">Or paste URL:</p>
+                <input type="text" id="urlInput" class="mt-2 w-full p-2 border rounded" placeholder="https://app.com/privacy">
+                <button onclick="scanUrl()" class="mt-2 bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600">Scan URL</button>
+            </div>
+        </section>
+
+        <section id="results" class="mb-8 hidden">
+            <h2 class="text-xl font-semibold mb-2">Privacy Scan Results</h2>
+            <div id="scanReport" class="bg-white p-4 rounded shadow"></div>
+            <button onclick="suggestAlternatives()" class="mt-4 bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600 hidden" id="suggestButton">Find Safer Alternatives</button>
+        </section>
+
+        <section id="tips" class="mb-8">
+            <h2 class="text-xl font-semibold mb-2">App Privacy Tips</h2>
+            <ul class="list-disc pl-5 text-gray-700">
+                <li>Check app permissions before installing.</li>
+                <li>Avoid apps that share data with third parties unnecessarily.</li>
+                <li>Disable unused permissions in your device settings.</li>
+            </ul>
+        </section>
+    </main>
+
+    <script>
+        function scanPolicy() {
+            const fileInput = document.getElementById('fileInput');
+            const scanReport = document.getElementById('scanReport');
+            const resultsSection = document.getElementById('results');
+            const suggestButton = document.getElementById('suggestButton');
+
+            if (fileInput.files.length === 0) return;
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const content = e.target.result.toLowerCase();
+                // Basic keyword-based analysis (expand with NLP for production)
+                const riskyPatterns = [
+                    { term: 'third-party sharing', risk: 'High', desc: 'Shares data with external companies' },
+                    { term: 'location tracking', risk: 'Medium', desc: 'Tracks your location' },
+                    { term: 'camera access', risk: 'Medium', desc: 'Requests camera access' }
+                ];
+
+                let risks = [];
+                riskyPatterns.forEach(pattern => {
+                    if (content.includes(pattern.term)) {
+                        risks.push(pattern);
+                    }
+                });
+
+                resultsSection.classList.remove('hidden');
+                if (risks.length > 0) {
+                    scanReport.innerHTML = `
+                        <p class="text-red-600 font-medium">Privacy Risk: High</p>
+                        <p>Risky practices detected:</p>
+                        <ul class="list-disc pl-5">
+                            ${risks.map(r => `<li>${r.desc} (${r.risk})</li>`).join('')}
+                        </ul>
+                        <p class="text-sm text-gray-600">Recommendation: Consider safer alternatives or disable risky permissions.</p>
+                    `;
+                    suggestButton.classList.remove('hidden');
+                } else {
+                    scanReport.innerHTML = `
+                        <p class="text-green-600 font-medium">Privacy Risk: Low</p>
+                        <p>No major privacy concerns detected. App appears safe.</p>
+                    `;
+                    suggestButton.classList.add('hidden');
+                }
+            };
+
+            reader.readAsText(file);
+        }
+
+        function scanUrl() {
+            const url = document.getElementById('urlInput').value.toLowerCase();
+            const scanReport = document.getElementById('scanReport');
+            const resultsSection = document.getElementById('results');
+            const suggestButton = document.getElementById('suggestButton');
+
+            if (!url) return;
+
+            // Simulated responses based on URL patterns (hardcoded for demo purposes)
+            let riskLevel = 'Low';
+            let message = 'No major privacy concerns detected. App appears safe.';
+            let risks = [];
+            let showSuggest = false;
+
+            if (url.includes('example1.com')) {
+                // Medium with location
+                riskLevel = 'Medium';
+                message = 'Potential location tracking detected.';
+                risks = [{ desc: 'Tracks your location', risk: 'Medium' }];
+                showSuggest = true;
+            } else if (url.includes('example2.com')) {
+                // High with location, camera, mic
+                riskLevel = 'High';
+                message = 'Multiple high-risk practices detected.';
+                risks = [
+                    { desc: 'Tracks your location', risk: 'High' },
+                    { desc: 'Requests camera access', risk: 'High' },
+                    { desc: 'Requests microphone access', risk: 'High' }
+                ];
+                showSuggest = true;
+            } else if (url.includes('example3.com')) {
+                // Medium with clipboard access, ads data
+                riskLevel = 'Medium';
+                message = 'Potential data access and advertising concerns detected.';
+                risks = [
+                    { desc: 'Accesses clipboard data', risk: 'Medium' },
+                    { desc: 'Collects data for ads', risk: 'Medium' }
+                ];
+                showSuggest = true;
+            } else {
+                // Default: Medium with location (as in original placeholder)
+                riskLevel = 'Medium';
+                message = 'Potential location tracking detected.';
+                risks = [{ desc: 'Tracks your location', risk: 'Medium' }];
+                showSuggest = true;
+            }
+
+            resultsSection.classList.remove('hidden');
+            const colorClass = riskLevel === 'High' ? 'text-red-600' : riskLevel === 'Medium' ? 'text-yellow-600' : 'text-green-600';
+            let risksHtml = '';
+            if (risks.length > 0) {
+                risksHtml = `
+                    <p>Risky practices detected:</p>
+                    <ul class="list-disc pl-5">
+                        ${risks.map(r => `<li>${r.desc} (${r.risk})</li>`).join('')}
+                    </ul>
+                `;
+            }
+            scanReport.innerHTML = `
+                <p class="${colorClass} font-medium">Privacy Risk: ${riskLevel}</p>
+                <p>${message}</p>
+                ${risksHtml}
+                <p class="text-sm text-gray-600">Recommendation: ${showSuggest ? 'Consider safer alternatives or disable risky permissions.' : 'App appears safe.'}</p>
+            `;
+            if (showSuggest) {
+                suggestButton.classList.remove('hidden');
+            } else {
+                suggestButton.classList.add('hidden');
+            }
+
+            // Placeholder alert for scanning (can be replaced with actual fetch in production)
+            alert(`Scanning privacy policy at ${url}... (Simulated for demo)`);
+        }
+
+        function suggestAlternatives() {
+            // Placeholder for alternative app suggestions (integrate with app store APIs)
+            alert('Finding safer app alternatives... (Feature to be implemented)');
+        }
+
+        // Enable drag-and-drop
+        const dropZone = document.querySelector('.border-dashed');
+        dropZone.addEventListener('dragover', e => e.preventDefault());
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            document.getElementById('fileInput').files = e.dataTransfer.files;
+            scanPolicy();
+        });
+    </script>
+</body>
+</html>
