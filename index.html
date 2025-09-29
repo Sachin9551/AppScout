@@ -96,82 +96,64 @@
             reader.readAsText(file);
         }
 
-        function scanUrl() {
-            const url = document.getElementById('urlInput').value.toLowerCase();
+        async function scanUrl() {
+            const url = document.getElementById('urlInput').value.trim();
             const scanReport = document.getElementById('scanReport');
             const resultsSection = document.getElementById('results');
             const suggestButton = document.getElementById('suggestButton');
 
             if (!url) return;
 
-            // Simulated responses based on URL patterns (hardcoded for demo purposes)
-            let riskLevel = 'Low';
-            let message = 'No major privacy concerns detected. App appears safe.';
-            let risks = [];
-            let showSuggest = false;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Network response was not ok');
 
-            if (url.includes('example1.com')) {
-                // Medium with location
-                riskLevel = 'Medium';
-                message = 'Potential location tracking detected.';
-                risks = [{ desc: 'Tracks your location', risk: 'Medium' }];
-                showSuggest = true;
-            } else if (url.includes('example2.com')) {
-                // High with location, camera, mic
-                riskLevel = 'High';
-                message = 'Multiple high-risk practices detected.';
-                risks = [
-                    { desc: 'Tracks your location', risk: 'High' },
-                    { desc: 'Requests camera access', risk: 'High' },
-                    { desc: 'Requests microphone access', risk: 'High' }
-                ];
-                showSuggest = true;
-            } else if (url.includes('example3.com')) {
-                // Medium with clipboard access, ads data
-                riskLevel = 'Medium';
-                message = 'Potential data access and advertising concerns detected.';
-                risks = [
-                    { desc: 'Accesses clipboard data', risk: 'Medium' },
-                    { desc: 'Collects data for ads', risk: 'Medium' }
-                ];
-                showSuggest = true;
-            } else {
-                // Default: Medium with location (as in original placeholder)
-                riskLevel = 'Medium';
-                message = 'Potential location tracking detected.';
-                risks = [{ desc: 'Tracks your location', risk: 'Medium' }];
-                showSuggest = true;
-            }
+                const content = (await response.text()).toLowerCase();
+                let risks = [];
 
-            resultsSection.classList.remove('hidden');
-            const colorClass = riskLevel === 'High' ? 'text-red-600' : riskLevel === 'Medium' ? 'text-yellow-600' : 'text-green-600';
-            let risksHtml = '';
-            if (risks.length > 0) {
-                risksHtml = `
-                    <p>Risky practices detected:</p>
-                    <ul class="list-disc pl-5">
-                        ${risks.map(r => `<li>${r.desc} (${r.risk})</li>`).join('')}
-                    </ul>
+                if (content.includes('microphone')) risks.push({desc: 'Requests microphone access', risk: 'High'});
+                if (content.includes('camera')) risks.push({desc: 'Requests camera access', risk: 'High'});
+                if (content.includes('location')) risks.push({desc: 'Tracks your location', risk: 'Medium'});
+                if (content.includes('clipboard')) risks.push({desc: 'Accesses clipboard data', risk: 'Medium'});
+                if (content.includes('ads') || content.includes('advertising')) risks.push({desc: 'Collects data for ads', risk: 'Medium'});
+
+                let riskLevel = 'Low';
+                let colorClass = 'text-green-600';
+                if (risks.some(r => r.risk === 'High')) {
+                    riskLevel = 'High';
+                    colorClass = 'text-red-600';
+                } else if (risks.length > 0) {
+                    riskLevel = 'Medium';
+                    colorClass = 'text-yellow-600';
+                }
+
+                let risksHtml = '';
+                if (risks.length > 0) {
+                    risksHtml = `
+                        <p>Risky practices detected:</p>
+                        <ul class="list-disc pl-5">
+                            ${risks.map(r => `<li>${r.desc} (${r.risk})</li>`).join('')}
+                        </ul>
+                    `;
+                }
+                scanReport.innerHTML = `
+                    <p class="${colorClass} font-medium">Privacy Risk: ${riskLevel}</p>
+                    ${risksHtml}
+                    <p class="text-sm text-gray-600">
+                        Recommendation: ${riskLevel !== 'Low' ? 'Consider safer alternatives or disable risky permissions.' : 'App appears safe.'}
+                    </p>
                 `;
-            }
-            scanReport.innerHTML = `
-                <p class="${colorClass} font-medium">Privacy Risk: ${riskLevel}</p>
-                <p>${message}</p>
-                ${risksHtml}
-                <p class="text-sm text-gray-600">Recommendation: ${showSuggest ? 'Consider safer alternatives or disable risky permissions.' : 'App appears safe.'}</p>
-            `;
-            if (showSuggest) {
-                suggestButton.classList.remove('hidden');
-            } else {
+                if (riskLevel !== 'Low') suggestButton.classList.remove('hidden');
+                else suggestButton.classList.add('hidden');
+                resultsSection.classList.remove('hidden');
+            } catch (error) {
+                scanReport.innerHTML = `<p class="text-red-600">Error scanning URL. Privacy policy could not be fetched.</p>`;
+                resultsSection.classList.remove('hidden');
                 suggestButton.classList.add('hidden');
             }
-
-            // Placeholder alert for scanning (can be replaced with actual fetch in production)
-            alert(`Scanning privacy policy at ${url}... (Simulated for demo)`);
         }
 
         function suggestAlternatives() {
-            // Placeholder for alternative app suggestions (integrate with app store APIs)
             alert('Finding safer app alternatives... (Feature to be implemented)');
         }
 
