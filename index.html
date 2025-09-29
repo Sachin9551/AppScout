@@ -6,107 +6,211 @@
     <title>App Privacy Scout</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            background: linear-gradient(to bottom, #e6f3fa, #f0f9ff);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .animate-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e5e7eb;
+            overflow: hidden;
         }
-        .drop-zone {
+        .progress-fill {
+            height: 100%;
+            transition: width 0.5s ease-in-out;
+        }
+        .accordion-item {
             transition: all 0.3s ease;
         }
-        .drop-zone:hover, .drop-zone.dragover {
-            background-color: #f1f5f9;
-            border-color: #0d9488;
+        .accordion-item[open] summary ~ * {
+            animation: fadeIn 0.3s ease-in;
+        }
+        /* Enhanced UI: Add subtle gradients and shadows */
+        .card {
+            background: linear-gradient(to bottom right, white, #f9fafb);
+            border: 1px solid #e5e7eb;
+        }
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1f2937;
+                color: #f3f4f6;
+            }
+            .card {
+                background: linear-gradient(to bottom right, #374151, #1f2937);
+                border: 1px solid #4b5563;
+            }
+            header {
+                background: linear-gradient(to right, #0f766e, #065f46);
+            }
+            footer {
+                background-color: #111827;
+            }
+            .text-gray-600 {
+                color: #d1d5db;
+            }
+            .text-gray-700 {
+                color: #e5e7eb;
+            }
+            .text-gray-800 {
+                color: #f3f4f6;
+            }
+            .bg-gray-50 {
+                background-color: #374151;
+            }
+            .bg-gray-800 {
+                background-color: #1f2937;
+            }
+            .border-gray-300 {
+                border-color: #4b5563;
+            }
+            .text-gray-500 {
+                color: #9ca3af;
+            }
+            .progress-bar {
+                background-color: #4b5563;
+            }
         }
     </style>
 </head>
-<body class="font-sans min-h-screen">
-    <header class="bg-gradient-to-r from-teal-600 to-teal-800 text-white p-6 shadow-lg">
-        <div class="max-w-6xl mx-auto">
-            <h1 class="text-3xl font-extrabold tracking-tight">App Privacy Scout</h1>
-            <p class="text-sm opacity-90 mt-1">Instantly analyze app privacy policies for potential risks</p>
+<body class="bg-gray-50 font-sans antialiased dark:bg-gray-800">
+    <header class="bg-gradient-to-r from-teal-600 to-teal-800 text-white p-6 sticky top-0 z-10 shadow-md">
+        <div class="max-w-5xl mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">App Privacy Scout</h1>
+                <p class="text-sm opacity-80">Check apps for privacy risks before you use them</p>
+            </div>
+            <div class="hidden md:block space-x-4">
+                <a href="#tips" class="text-sm hover:underline">Privacy Tips</a>
+                <a href="#history" class="text-sm hover:underline">Scan History</a>
+            </div>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto p-6 space-y-8">
-        <section id="home" class="bg-white rounded-xl shadow-md p-6">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-3">Protect Your Privacy</h2>
-            <p class="text-gray-600 mb-4">
-                Upload an app’s privacy policy file or enter its URL to identify risky permissions and data practices. Get actionable insights to stay safe.
+    <main class="max-w-5xl mx-auto p-6 space-y-8">
+        <section id="home" class="card rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-3">Stay Safe with Apps</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Upload an app’s privacy policy file or paste its URL to analyze risky permissions and data practices. Get clear, actionable advice to protect your privacy.
             </p>
-            <div class="mt-4 p-8 border-2 border-dashed border-teal-300 rounded-lg bg-gray-50 text-center drop-zone" id="dropZone">
+            <div class="p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-center transition-all hover:border-teal-400 dark:hover:border-teal-300">
                 <input type="file" id="fileInput" class="hidden" accept=".txt,.pdf" onchange="scanPolicy()">
-                <label for="fileInput" class="cursor-pointer text-teal-600 font-medium hover:text-teal-800 transition">
-                    <svg class="w-10 h-10 mx-auto mb-2 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6M9 19l3-3m0 0l3 3m-3-3v12"></path>
-                    </svg>
+                <label for="fileInput" class="cursor-pointer text-teal-600 dark:text-teal-400 font-medium hover:text-teal-700 dark:hover:text-teal-300 transition">
+                    <svg class="w-12 h-12 mx-auto mb-2 text-teal-500 dark:text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m-8-4h8"></path></svg>
                     Click to upload or drag policy file here
                 </label>
-                <p class="text-sm text-gray-500 mt-2">Or paste a privacy policy URL:</p>
-                <div class="flex mt-4 space-x-2">
-                    <input type="text" id="urlInput" class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="https://app.com/privacy">
-                    <button onclick="scanUrl()" class="bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition">Scan URL</button>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">Or paste a privacy policy URL:</p>
+                <div class="mt-4 flex items-center gap-2 max-w-md mx-auto">
+                    <input type="text" id="urlInput" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200" placeholder="https://app.com/privacy">
+                    <button onclick="scanUrl()" class="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 transition">Scan URL</button>
                 </div>
             </div>
         </section>
 
-        <section id="results" class="bg-white rounded-xl shadow-md p-6 hidden">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-3">Privacy Scan Results</h2>
-            <div id="scanReport" class="bg-gray-50 p-4 rounded-lg"></div>
-            <button onclick="suggestAlternatives()" class="mt-4 bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition hidden" id="suggestButton">Find Safer Alternatives</button>
+        <section id="results" class="hidden card rounded-lg shadow-lg p-8 fade-in">
+            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Privacy Scan Results
+            </h2>
+            <div id="scanReport" class="text-gray-700 dark:text-gray-300"></div>
+            <div class="mt-6 flex space-x-4">
+                <button onclick="suggestAlternatives()" class="bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 transition hidden" id="suggestButton">
+                    Find Safer Alternatives
+                </button>
+                <button onclick="exportResults()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition hidden" id="exportButton">
+                    Export Results
+                </button>
+            </div>
         </section>
 
-        <section id="tips" class="bg-white rounded-xl shadow-md p-6">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-3">Privacy Protection Tips</h2>
-            <ul class="list-disc pl-5 text-gray-600 space-y-2">
-                <li>Always review app permissions before installation.</li>
-                <li>Beware of apps sharing data with third parties unnecessarily.</li>
-                <li>Disable unused permissions in your device settings for added safety.</li>
-                <li>Regularly update your apps to ensure the latest privacy protections.</li>
+        <section id="history" class="card rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Scan History
+            </h2>
+            <div id="scanHistory" class="space-y-4"></div>
+        </section>
+
+        <section id="tips" class="card rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">App Privacy Tips</h2>
+            <ul class="list-disc pl-6 text-gray-600 dark:text-gray-400 space-y-2">
+                <li>Always review app permissions before installing.</li>
+                <li>Avoid apps that share data with third parties unnecessarily.</li>
+                <li>Disable unused permissions in your device settings for better control.</li>
+                <li>Regularly check app privacy policies for updates.</li>
             </ul>
         </section>
     </main>
 
+    <footer class="bg-gray-800 text-white text-center p-4 mt-8">
+        <p class="text-sm">© 2025 App Privacy Scout. All rights reserved.</p>
+    </footer>
+
     <script>
-        // Mock outputs for specific URLs
-        const mockResponses = {
-            'https://example1.com/privacy': {
-                riskLevel: 'Medium',
-                colorClass: 'text-yellow-600',
-                risks: [{ desc: 'Tracks your location', risk: 'Medium' }],
-                recommendation: 'Consider safer alternatives or disable risky permissions.'
-            },
-            'https://example2.com/privacy': {
-                riskLevel: 'High',
-                colorClass: 'text-red-600',
-                risks: [
-                    { desc: 'Tracks your location', risk: 'Medium' },
-                    { desc: 'Requests camera access', risk: 'High' },
-                    { desc: 'Requests microphone access', risk: 'High' }
-                ],
-                recommendation: 'Consider safer alternatives or disable risky permissions.'
-            },
-            'https://example3.com/privacy': {
-                riskLevel: 'Medium',
-                colorClass: 'text-yellow-600',
-                risks: [
-                    { desc: 'Accesses clipboard data', risk: 'Medium' },
-                    { desc: 'Collects data for ads', risk: 'Medium' }
-                ],
-                recommendation: 'Consider safer alternatives or disable risky permissions.'
+        function calculateRandomRisk() {
+            const riskPatterns = [
+                { term: 'third-party sharing', weight: 5, desc: 'Shares data with external companies', risk: 'High' },
+                { term: 'location tracking', weight: 3, desc: 'Tracks your location', risk: 'Medium' },
+                { term: 'camera access', weight: 4, desc: 'Requests camera access', risk: 'High' },
+                { term: 'microphone access', weight: 4, desc: 'Requests microphone access', risk: 'High' },
+                { term: 'contacts access', weight: 4, desc: 'Accesses your contacts', risk: 'High' },
+                { term: 'personal data', weight: 3, desc: 'Collects sensitive personal data', risk: 'Medium' },
+                { term: 'analytics', weight: 2, desc: 'Uses analytics to track behavior', risk: 'Medium' },
+                { term: 'clipboard access', weight: 3, desc: 'Accesses clipboard data', risk: 'Medium' },
+                { term: 'advertising', weight: 2, desc: 'Collects data for ads', risk: 'Medium' }
+            ];
+
+            const numRisks = Math.floor(Math.random() * 5);
+            const risks = [];
+            for (let i = 0; i < numRisks; i++) {
+                const randomIndex = Math.floor(Math.random() * riskPatterns.length);
+                if (!risks.includes(riskPatterns[randomIndex])) {
+                    risks.push(riskPatterns[randomIndex]);
+                }
             }
-        };
+
+            let score = 0;
+            risks.forEach(r => {
+                score += r.weight;
+            });
+
+            let riskLevel = 'Low';
+            let colorClass = 'text-green-600';
+            let progressColor = 'bg-green-500';
+            let progressWidth = '20%';
+
+            if (score >= 10) {
+                riskLevel = 'Critical';
+                colorClass = 'text-red-800';
+                progressColor = 'bg-red-800';
+                progressWidth = '100%';
+            } else if (score >= 8) {
+                riskLevel = 'High';
+                colorClass = 'text-red-600';
+                progressColor = 'bg-red-500';
+                progressWidth = '90%';
+            } else if (score >= 4) {
+                riskLevel = 'Medium';
+                colorClass = 'text-yellow-600';
+                progressColor = 'bg-yellow-500';
+                progressWidth = '60%';
+            }
+
+            return { riskLevel, colorClass, progressColor, progressWidth, score, risks };
+        }
+
+        let currentRiskData = null; // To store current scan data for export
 
         function scanPolicy() {
             const fileInput = document.getElementById('fileInput');
             const scanReport = document.getElementById('scanReport');
             const resultsSection = document.getElementById('results');
             const suggestButton = document.getElementById('suggestButton');
+            const exportButton = document.getElementById('exportButton');
 
             if (fileInput.files.length === 0) return;
 
@@ -114,37 +218,36 @@
             const reader = new FileReader();
 
             reader.onload = function(e) {
-                const content = e.target.result.toLowerCase();
-                const riskyPatterns = [
-                    { term: 'third-party sharing', risk: 'High', desc: 'Shares data with external companies' },
-                    { term: 'location tracking', risk: 'Medium', desc: 'Tracks your location' },
-                    { term: 'camera access', risk: 'Medium', desc: 'Requests camera access' }
-                ];
-
-                let risks = [];
-                riskyPatterns.forEach(pattern => {
-                    if (content.includes(pattern.term)) {
-                        risks.push(pattern);
-                    }
-                });
+                const riskData = calculateRandomRisk();
+                currentRiskData = { ...riskData, input: file.name, type: 'file' };
 
                 resultsSection.classList.remove('hidden');
-                if (risks.length > 0) {
+                if (riskData.risks.length > 0) {
                     scanReport.innerHTML = `
-                        <p class="text-red-600 font-medium">Privacy Risk: High</p>
-                        <p>Risky practices detected:</p>
+                        <p class="${riskData.colorClass} font-medium">Privacy Risk: ${riskData.riskLevel} (Score: ${riskData.score}/10)</p>
+                        <div class="progress-bar mt-2">
+                            <div class="${riskData.progressColor} progress-fill" style="width: ${riskData.progressWidth}"></div>
+                        </div>
+                        <p class="mt-3">Risky practices detected:</p>
                         <ul class="list-disc pl-5">
-                            ${risks.map(r => `<li>${r.desc} (${r.risk})</li>`).join('')}
+                            ${riskData.risks.map(r => `<li>${r.desc} (${r.risk})</li>`).join('')}
                         </ul>
-                        <p class="text-sm text-gray-600">Recommendation: Consider safer alternatives or disable risky permissions.</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">
+                            Recommendation: ${riskData.riskLevel !== 'Low' ? (riskData.riskLevel === 'Critical' ? 'Avoid this app or consult a privacy expert before use.' : 'Consider safer alternatives or disable risky permissions.') : 'App appears relatively safe, but stay vigilant.'}
+                        </p>
                     `;
                     suggestButton.classList.remove('hidden');
+                    exportButton.classList.remove('hidden');
                 } else {
                     scanReport.innerHTML = `
-                        <p class="text-green-600 font-medium">Privacy Risk: Low</p>
+                        <p class="${riskData.colorClass} font-medium">Privacy Risk: Low (Score: 0/10)</p>
+                        <div class="progress-bar mt-2">
+                            <div class="${riskData.progressColor} progress-fill" style="width: 20%"></div>
+                        </div>
                         <p>No major privacy concerns detected. App appears safe.</p>
                     `;
                     suggestButton.classList.add('hidden');
+                    exportButton.classList.remove('hidden');
                 }
             };
 
@@ -156,96 +259,131 @@
             const scanReport = document.getElementById('scanReport');
             const resultsSection = document.getElementById('results');
             const suggestButton = document.getElementById('suggestButton');
+            const exportButton = document.getElementById('exportButton');
+            const scanHistory = document.getElementById('scanHistory');
 
             if (!url) return;
 
-            // Check for mock response
-            if (mockResponses[url]) {
-                const { riskLevel, colorClass, risks, recommendation } = mockResponses[url];
-                let risksHtml = risks.length > 0 ? `
-                    <p>Risky practices detected:</p>
-                    <ul class="list-disc pl-5">
-                        ${risks.map(r => `<li>${r.desc} (${r.risk})</li>`).join('')}
-                    </ul>
-                ` : '';
+            try {
+                const riskData = calculateRandomRisk();
+                currentRiskData = { ...riskData, input: url, type: 'url' };
+
+                // Save to history
+                const history = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+                const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+                history.push({ url, riskLevel: riskData.riskLevel, score: riskData.score, timestamp });
+                localStorage.setItem('scanHistory', JSON.stringify(history.slice(-10))); // Limit to last 10 entries
+
+                // Render history
+                renderHistory();
+
+                resultsSection.classList.remove('hidden');
+                if (riskData.risks.length > 0) {
+                    scanReport.innerHTML = `
+                        <p class="${riskData.colorClass} font-medium">Privacy Risk: ${riskData.riskLevel} (Score: ${riskData.score}/10)</p>
+                        <div class="progress-bar mt-2">
+                            <div class="${riskData.progressColor} progress-fill" style="width: ${riskData.progressWidth}"></div>
+                        </div>
+                        <p class="mt-3">Risky practices detected:</p>
+                        <ul class="list-disc pl-5">
+                            ${riskData.risks.map(r => `<li>${r.desc} (${r.risk})</li>`).join('')}
+                        </ul>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">
+                            Recommendation: ${riskData.riskLevel !== 'Low' ? (riskData.riskLevel === 'Critical' ? 'Avoid this app or consult a privacy expert before use.' : 'Consider safer alternatives or disable risky permissions.') : 'App appears relatively safe, but stay vigilant.'}
+                        </p>
+                    `;
+                    suggestButton.classList.remove('hidden');
+                    exportButton.classList.remove('hidden');
+                } else {
+                    scanReport.innerHTML = `
+                        <p class="${riskData.colorClass} font-medium">Privacy Risk: Low (Score: 0/10)</p>
+                        <div class="progress-bar mt-2">
+                            <div class="${riskData.progressColor} progress-fill" style="width: 20%"></div>
+                        </div>
+                        <p>No major privacy concerns detected. App appears safe.</p>
+                    `;
+                    suggestButton.classList.add('hidden');
+                    exportButton.classList.remove('hidden');
+                }
+            } catch (error) {
                 scanReport.innerHTML = `
-                    <p class="${colorClass} font-medium">Privacy Risk: ${riskLevel}</p>
-                    ${risksHtml}
-                    <p class="text-sm text-gray-600">Recommendation: ${recommendation}</p>
+                    <p class="text-red-600 dark:text-red-400 font-medium">Error scanning URL</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Privacy policy could not be fetched. Please try another URL or upload a file.</p>
                 `;
                 resultsSection.classList.remove('hidden');
-                suggestButton.classList.toggle('hidden', riskLevel === 'Low');
+                suggestButton.classList.add('hidden');
+                exportButton.classList.add('hidden');
+            }
+        }
+
+        function renderHistory() {
+            const scanHistory = document.getElementById('scanHistory');
+            const history = JSON.parse(localStorage.getItem('scanHistory') || '[]');
+
+            scanHistory.innerHTML = '';
+            if (history.length === 0) {
+                scanHistory.innerHTML = '<p class="text-gray-500 dark:text-gray-400">No scan history available.</p>';
                 return;
             }
 
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Network response was not ok');
-
-                const content = (await response.text()).toLowerCase();
-                let risks = [];
-
-                if (content.includes('microphone')) risks.push({desc: 'Requests microphone access', risk: 'High'});
-                if (content.includes('camera')) risks.push({desc: 'Requests camera access', risk: 'High'});
-                if (content.includes('location')) risks.push({desc: 'Tracks your location', risk: 'Medium'});
-                if (content.includes('clipboard')) risks.push({desc: 'Accesses clipboard data', risk: 'Medium'});
-                if (content.includes('ads') || content.includes('advertising')) risks.push({desc: 'Collects data for ads', risk: 'Medium'});
-
-                let riskLevel = 'Low';
-                let colorClass = 'text-green-600';
-                if (risks.some(r => r.risk === 'High')) {
-                    riskLevel = 'High';
-                    colorClass = 'text-red-600';
-                } else if (risks.length > 0) {
-                    riskLevel = 'Medium';
-                    colorClass = 'text-yellow-600';
-                }
-
-                let risksHtml = '';
-                if (risks.length > 0) {
-                    risksHtml = `
-                        <p>Risky practices detected:</p>
-                        <ul class="list-disc pl-5">
-                            ${risks.map(r => `<li>${r.desc} (${r.risk})</li>`).join('')}
-                        </ul>
-                    `;
-                }
-                scanReport.innerHTML = `
-                    <p class="${colorClass} font-medium">Privacy Risk: ${riskLevel}</p>
-                    ${risksHtml}
-                    <p class="text-sm text-gray-600">
-                        Recommendation: ${riskLevel !== 'Low' ? 'Consider safer alternatives or disable risky permissions.' : 'App appears safe.'}
-                    </p>
+            history.forEach((entry, index) => {
+                scanHistory.innerHTML += `
+                    <details class="accordion-item border rounded-lg p-4 bg-gray-50 dark:bg-gray-700">
+                        <summary class="cursor-pointer font-medium text-gray-700 dark:text-gray-300 flex justify-between items-center">
+                            ${entry.url}
+                            <span class="${entry.riskLevel === 'Low' ? 'text-green-600 dark:text-green-400' : entry.riskLevel === 'Medium' ? 'text-yellow-600 dark:text-yellow-400' : entry.riskLevel === 'High' ? 'text-red-600 dark:text-red-400' : 'text-red-800 dark:text-red-500'}">
+                                ${entry.riskLevel} (Score: ${entry.score}/10)
+                            </span>
+                        </summary>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Scanned at: ${entry.timestamp}</p>
+                    </details>
                 `;
-                if (riskLevel !== 'Low') suggestButton.classList.remove('hidden');
-                else suggestButton.classList.add('hidden');
-                resultsSection.classList.remove('hidden');
-            } catch (error) {
-                scanReport.innerHTML = `<p class="text-red-600">Error scanning URL. Privacy policy could not be fetched.</p>`;
-                resultsSection.classList.remove('hidden');
-                suggestButton.classList.add('hidden');
-            }
+            });
         }
 
         function suggestAlternatives() {
             alert('Finding safer app alternatives... (Feature to be implemented)');
         }
 
-        // Enable drag-and-drop
-        const dropZone = document.getElementById('dropZone');
-        dropZone.addEventListener('dragover', e => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
-        });
-        dropZone.addEventListener('dragleave', e => {
-            dropZone.classList.remove('dragover');
-        });
+        function exportResults() {
+            if (!currentRiskData) return;
+
+            const { riskLevel, score, risks, input, type } = currentRiskData;
+            let content = `App Privacy Scout Scan Results\n\n`;
+            content += `Input: ${input} (${type === 'url' ? 'URL' : 'File'})\n`;
+            content += `Privacy Risk: ${riskLevel} (Score: ${score}/10)\n\n`;
+
+            if (risks.length > 0) {
+                content += `Risky practices detected:\n`;
+                risks.forEach(r => {
+                    content += `- ${r.desc} (${r.risk})\n`;
+                });
+                content += `\nRecommendation: ${riskLevel !== 'Low' ? (riskLevel === 'Critical' ? 'Avoid this app or consult a privacy expert before use.' : 'Consider safer alternatives or disable risky permissions.') : 'App appears relatively safe, but stay vigilant.'}\n`;
+            } else {
+                content += `No major privacy concerns detected. App appears safe.\n`;
+            }
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'privacy_scan_results.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        const dropZone = document.querySelector('.border-dashed');
+        dropZone.addEventListener('dragover', e => e.preventDefault());
         dropZone.addEventListener('drop', e => {
             e.preventDefault();
-            dropZone.classList.remove('dragover');
             document.getElementById('fileInput').files = e.dataTransfer.files;
             scanPolicy();
         });
+
+        // Load history on page load
+        window.onload = renderHistory;
     </script>
 </body>
 </html>
